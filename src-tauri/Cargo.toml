@@ -1,0 +1,17 @@
+[package]
+name = "channel-video-tools"
+version = "1.0.0"
+description = "渠道视频批量处理工具"
+authors = ["channel-video-tools"]
+edition = "2021"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-shell = "2"
+
+[features]
+default = ["custom-protocol"]
+custom-protocol = ["tauri/custom-protocol"]

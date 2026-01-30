@@ -1,0 +1,57 @@
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+}
+:root {
+  --bg: #e8e8e8;
+  --fg: #1a1a1a;
+  --card: #f5f5f5;
+  --border: #ccc;
+  --primary: #1f6aa5;
+  --primary-hover: #144870;
+}
+[data-theme="dark"] {
+  --bg: #1a1a1a;
+  --fg: #e8e8e8;
+  --card: #252525;
+  --border: #444;
+  --primary: #3b8ed0;
+  --primary-hover: #36719f;
+}
+
+#app {
+  min-height: 100vh;
+  padding: 12px;
+}
+
+button.primary {
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+button.primary:hover {
+  background: var(--primary-hover);
+}
+button.secondary {
+  background: var(--card);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+input, select {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--fg);
+}

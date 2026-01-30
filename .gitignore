@@ -1,0 +1,42 @@
+# Python
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.env
+.venv/
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Node
+node_modules/
+frontend/node_modules/
+npm-debug.log*
+.npm
+
+# Rust / Tauri
+src-tauri/target/
+
+# IDE / 编辑器
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# FFmpeg 可执行文件（体积超 GitHub 限制，请本地放置）
+tools/ffmpeg/ffmpeg.exe
+tools/ffmpeg/ffplay.exe
+tools/ffmpeg/ffprobe.exe
+
+# 系统与临时
+.DS_Store
+Thumbs.db
+*.log
+
+# 可选：不提交 Cursor/Claude 本地配置（取消注释则忽略）
+# .cursor/
+# .claude/

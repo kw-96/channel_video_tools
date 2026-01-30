@@ -1,0 +1,3 @@
+customtkinter>=5.0.0
+iconipy>=0.5.0
+Pillow>=10.0.0
