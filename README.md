@@ -12,12 +12,38 @@
 ## 环境要求
 
 - **Node.js** 18+（前端与 Tauri CLI）
-- **Rust**（Tauri 2 构建，安装见 [rustup](https://rustup.rs/)）
+- **Rust**（Tauri 2 构建，安装见 [rustup](https://rustup.rs/)）。若下载过慢，可先设置国内镜像，见下方「Rust 使用国内镜像（可选）」。
 - **Windows 用户（Tauri 构建）**：二选一。
   - **有管理员权限**：安装 [Visual Studio 生成工具](https://visualstudio.microsoft.com/zh-hans/visual-cpp-build-tools/)，勾选「使用 C++ 的桌面开发」。
   - **无管理员权限**：使用 GNU 工具链，见下方「无管理员权限时（GNU 工具链）」。
 - **Python** 3.8+（后端 API）
 - **FFmpeg**（含 ffprobe）：请将 `ffmpeg.exe`、`ffprobe.exe` 等放入 `tools/ffmpeg/` 目录，或确保系统 PATH 中已安装；程序优先使用 `tools/ffmpeg/` 下的可执行文件。
+
+### Rust 使用国内镜像（可选）
+
+若 `rustup` 安装或更新工具链时下载很慢，可在**同一终端**中先设置镜像再执行 `rustup`。若已设镜像仍很慢，多半是**续传了之前从官方源的未完成下载**：先按下面「清除未完成下载」操作，再重新执行镜像命令。
+
+**方式一：中科大 USTC（PowerShell）**
+```powershell
+$env:RUSTUP_DIST_SERVER="https://mirrors.ustc.edu.cn/rust-static"
+$env:RUSTUP_UPDATE_ROOT="https://mirrors.ustc.edu.cn/rust-static/rustup"
+rustup default stable-x86_64-pc-windows-gnu
+```
+
+**方式二：清华大学 TUNA（PowerShell，可换用试速度）**
+```powershell
+$env:RUSTUP_DIST_SERVER="https://mirrors.tuna.tsinghua.edu.cn/rustup"
+$env:RUSTUP_UPDATE_ROOT="https://mirrors.tuna.tsinghua.edu.cn/rustup/rustup"
+rustup default stable-x86_64-pc-windows-gnu
+```
+
+**清除未完成下载（设了镜像仍慢时建议执行）：**  
+先按 Ctrl+C 停掉当前 `rustup`，再在同一终端执行：
+```powershell
+Remove-Item -Recurse -Force "$env:USERPROFILE\.rustup\downloads\*" -ErrorAction SilentlyContinue
+Remove-Item -Recurse -Force "$env:USERPROFILE\.rustup\toolchains" -ErrorAction SilentlyContinue
+```
+然后重新设置上面任一镜像并再次执行 `rustup default stable-x86_64-pc-windows-gnu`，会从镜像重新完整下载。
 
 ### 无管理员权限时（GNU 工具链）
 
@@ -67,7 +93,7 @@ pip install -r api/requirements.txt
 
 ### 2. 开发运行
 
-Tauri 启动时会自动在后台启动 Python API（`api/main.py`），无需单独开终端。
+Tauri 启动时会自动在后台启动 Python API（`api/main.py`），**默认使用项目根目录下的 venv**（若存在），无需单独开终端。
 
 在项目根目录执行：
 
@@ -150,6 +176,14 @@ python main.py
 pip install -r requirements-dev.txt
 python run_dev.py
 ```
+
+## 常见问题
+
+**点击「开始处理」后提示「无法连接后端服务」或「Failed to fetch」**
+
+- 表示前端连不上 API（127.0.0.1:8765）。Tauri 启动时会**优先使用项目根目录下的 venv**（`venv/Scripts/python.exe` 或 `venv/bin/python`），若 venv 不存在才用系统 `python`。
+- 请先创建并安装依赖：`python -m venv venv`，`venv\Scripts\activate`，`pip install -r requirements.txt`，`pip install -r api/requirements.txt`。之后直接 `npm run tauri dev` 即可。
+- 若希望使用其他 Python（如系统 Python），可设置环境变量后再启动：`$env:PYTHON = "C:\path\to\python.exe"`（PowerShell）或 `export PYTHON=/usr/bin/python3`（bash），再执行 `npm run tauri dev`。
 
 ## 与 FFmpeg 的关系
 

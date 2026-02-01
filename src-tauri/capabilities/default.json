@@ -4,6 +4,13 @@
   "windows": ["*"],
   "permissions": [
     "core:default",
-    "shell:allow-execute"
+    "core:window:allow-close",
+    "core:window:allow-minimize",
+    "core:window:allow-maximize",
+    "core:window:allow-toggle-maximize",
+    "core:window:allow-start-dragging",
+    "shell:allow-execute",
+    "dialog:allow-open",
+    "dialog:allow-save"
   ]
 }

@@ -15,14 +15,15 @@
         "title": "渠道视频批量处理工具",
         "width": 860,
         "height": 560,
-        "resizable": true
+        "resizable": true,
+        "decorations": false
       }
     ]
   },
   "bundle": {
     "active": true,
     "targets": "all",
-    "icon": [],
+    "icon": ["icons/icon.ico"],
     "windows": {
       "certificateThumbprint": null,
       "digestAlgorithm": "sha256",
@@ -34,19 +35,7 @@
   },
   "plugins": {
     "shell": {
-      "open": true,
-      "scope": [
-        {
-          "name": "python",
-          "cmd": "python",
-          "args": true
-        },
-        {
-          "name": "python3",
-          "cmd": "python3",
-          "args": true
-        }
-      ]
+      "open": true
     }
   }
 }

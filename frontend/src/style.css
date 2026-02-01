@@ -1,57 +1,458 @@
-* {
+/* 设计令牌与全局样式 - 简洁现代，深色/浅色双主题 */
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
+
+:root {
+  --font-sans: "DM Sans", system-ui, sans-serif;
+  --bg: #f4f4f2;
+  --bg-elevated: #fafaf8;
+  --fg: #1c1c1c;
+  --fg-muted: #5c5c5c;
+  --card: #ffffff;
+  --card-hover: #f8f8f6;
+  --border: #e0e0dc;
+  --border-focus: #0d9488;
+  --primary: #0d9488;
+  --primary-hover: #0f766e;
+  --primary-ghost: rgba(13, 148, 136, 0.12);
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06);
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.2s ease;
+}
+
+[data-theme="dark"] {
+  --bg: #0f0f0f;
+  --bg-elevated: #161616;
+  --fg: #f0f0ee;
+  --fg-muted: #a0a0a0;
+  --card: #1a1a1a;
+  --card-hover: #222222;
+  --border: #2a2a2a;
+  --border-focus: #2dd4bf;
+  --primary: #2dd4bf;
+  --primary-hover: #5eead4;
+  --primary-ghost: rgba(45, 212, 191, 0.15);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.5;
   background: var(--bg);
   color: var(--fg);
-}
-:root {
-  --bg: #e8e8e8;
-  --fg: #1a1a1a;
-  --card: #f5f5f5;
-  --border: #ccc;
-  --primary: #1f6aa5;
-  --primary-hover: #144870;
-}
-[data-theme="dark"] {
-  --bg: #1a1a1a;
-  --fg: #e8e8e8;
-  --card: #252525;
-  --border: #444;
-  --primary: #3b8ed0;
-  --primary-hover: #36719f;
+  -webkit-font-smoothing: antialiased;
 }
 
 #app {
   min-height: 100vh;
-  padding: 12px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 按钮：禁止文字换行，统一高度 */
+button {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  min-height: 40px;
+  box-sizing: border-box;
+  transition: background-color var(--transition-fast), color var(--transition-fast),
+    border-color var(--transition-fast), transform 0.1s ease;
 }
 
 button.primary {
   background: var(--primary);
   color: #fff;
   border: none;
-  padding: 8px 16px;
-  border-radius: 6px;
+  padding: 10px 18px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
 }
-button.primary:hover {
+
+button.primary:hover:not(:disabled) {
   background: var(--primary-hover);
 }
+
+button.primary:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--primary);
+}
+
+button.primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 button.secondary {
-  background: var(--card);
+  background: var(--bg-elevated);
   color: var(--fg);
   border: 1px solid var(--border);
-  padding: 8px 16px;
-  border-radius: 6px;
+  padding: 10px 18px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
 }
-input, select {
-  padding: 6px 10px;
-  border-radius: 6px;
+
+button.secondary:hover {
+  background: var(--card-hover);
+  border-color: var(--fg-muted);
+}
+
+button.secondary:focus-visible {
+  outline: none;
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px var(--primary-ghost);
+}
+
+/* 表单控件 */
+input,
+select,
+textarea {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
   border: 1px solid var(--border);
-  background: var(--card);
+  background: var(--bg-elevated);
   color: var(--fg);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--fg-muted);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px var(--primary-ghost);
+}
+
+/* 滑块：去掉内边距，让轨道占满宽度，100% 时滑块在最右侧 */
+input[type="range"] {
+  padding: 0;
+  height: 20px;
+  vertical-align: middle;
+}
+
+input[type="range"]:focus {
+  outline: none;
+}
+
+input[type="range"]:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 72px;
+}
+
+label {
+  font-weight: 500;
+  color: var(--fg);
+}
+
+/* 工具面板布局：扁平分区，无卡片框 */
+.panel {
+  max-width: 720px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.section-card {
+  padding: 16px 0;
+  margin-bottom: 0;
+  border-bottom: 1px solid var(--border);
+  background: transparent;
+}
+
+.section-card:last-child {
+  border-bottom: none;
+}
+
+.section-title {
+  margin: 0 0 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--fg);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.section-title .icon-wrap {
+  display: inline-flex;
+  color: var(--fg-muted);
+  flex-shrink: 0;
+}
+
+.hint {
+  margin: 0 0 10px;
+  font-size: 13px;
+  color: var(--fg-muted);
+  line-height: 1.45;
+}
+
+.form-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.form-row label {
+  white-space: nowrap;
+  font-size: 14px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.log-box {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  overflow: auto;
+  max-height: 280px;
+  min-height: 120px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--fg-muted);
+  font-family: ui-monospace, monospace;
+}
+
+.progress-bar-wrap {
+  margin-top: 10px;
+  height: 6px;
+  background: var(--bg-elevated);
+  border-radius: 3px;
+  overflow: hidden;
+  border: none;
+}
+
+.progress-bar-inner {
+  height: 100%;
+  background: var(--primary);
+  border-radius: 4px;
+  transition: width 0.2s ease;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.actions .btn-icon {
+  margin-right: 5px;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+/* 单行固定高度，过长省略号；RTL 使省略在左侧，保留末尾文件名等关键信息 */
+.selection-display {
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--fg-muted);
+  height: 1.4em;
+  line-height: 1.4em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  direction: rtl;
+  unicode-bidi: plaintext;
+}
+
+/* 参考 Python GUI：左右分栏、日志+按钮并排 */
+.two-cols {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.two-cols .col {
+  flex: 1;
+  min-width: 200px;
+}
+
+.log-with-buttons {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.log-with-buttons .log-area {
+  flex: 1;
+  min-width: 0;
+}
+
+/* 与日志区标题+间距等高，使「开始处理」上沿对齐日志框上沿 */
+.log-with-buttons .btn-col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-shrink: 0;
+  padding-top: 2.25rem;
+}
+
+/* 选择视频弹窗 */
+.dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.dialog-box {
+  position: relative;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  padding: 20px 24px;
+  min-width: 320px;
+  max-width: 90vw;
+}
+
+[data-theme="dark"] .dialog-box {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.dialog-close {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--fg-muted);
+  cursor: pointer;
+  transition: color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.dialog-close:hover {
+  color: var(--fg);
+  background: var(--bg-elevated);
+}
+
+.dialog-close:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--primary-ghost);
+}
+
+.dialog-header {
+  margin-bottom: 14px;
+}
+
+.dialog-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--fg);
+  text-align: center;
+}
+
+.dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+
+.done-dialog .done-dialog-msg {
+  margin: 0 0 16px;
+  white-space: pre-wrap;
+  font-size: 14px;
+  color: var(--fg-muted);
+}
+
+/* 拖拽区域：虚线框 + 文案 + 选择按钮 */
+.drop-zone {
+  margin-top: 8px;
+  padding: 32px 24px;
+  border: 2px dashed var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+  text-align: center;
+  transition: border-color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.drop-zone:hover,
+.drop-zone.drop-zone-active {
+  border-color: var(--primary);
+  background: var(--primary-ghost);
+}
+
+.drop-zone-text {
+  margin: 0 0 14px;
+  font-size: 14px;
+  color: var(--fg-muted);
+}
+
+.drop-zone-btn {
+  margin: 0 auto;
+}
+
+/* 分段按钮组（如：片头 | 片尾） */
+.segmented {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--bg-elevated);
+}
+
+.segmented button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  color: var(--fg-muted);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  min-height: 40px;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.segmented button + button {
+  border-left: 1px solid var(--border);
+}
+
+.segmented button:hover {
+  color: var(--fg);
+  background: var(--card-hover);
+}
+
+.segmented button.active {
+  color: var(--fg);
+  background: var(--card);
+  box-shadow: var(--shadow-sm);
 }
