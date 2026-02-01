@@ -27,9 +27,6 @@ src-tauri/target/
 *.swp
 *.swo
 
-# FFmpeg 二进制（体积超 GitHub 限制，需本地或另行获取）
-tools/ffmpeg/*.exe
-
 # 系统与临时
 .DS_Store
 Thumbs.db
