@@ -13,7 +13,7 @@
     "windows": [
       {
         "title": "渠道视频批量处理工具",
-        "width": 860,
+        "width": 720,
         "height": 560,
         "resizable": true,
         "decorations": false

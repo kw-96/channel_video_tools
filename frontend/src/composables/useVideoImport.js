@@ -8,11 +8,13 @@ import { openFiles, openDir, listVideoFilesInDir } from '../dialog'
 const STATUS_MAP = { pending: '待处理', processing: '处理中', success: '成功', fail: '失败' }
 
 /**
- * @param {{ onLog?: (msg: string) => void }} [options]
+ * @param {{ onLog?: (msg: string) => void, maxItems?: number }} [options]
+ *   maxItems: 列表最大条数，如 1 表示仅保留首个（合并 Tab 主体视频等）
  * @returns 视频列表状态、弹窗状态、拖拽区状态、操作方法及展示用工具函数
  */
 export function useVideoImport(options = {}) {
   const onLog = options.onLog || (() => {})
+  const maxItems = options.maxItems
 
   const videoList = ref([])
   const videoDialogOpen = ref(false)
@@ -29,6 +31,13 @@ export function useVideoImport(options = {}) {
   }
 
   function appendPaths(newPaths) {
+    if (maxItems === 1) {
+      if (newPaths.length) {
+        videoList.value = [{ path: newPaths[0], status: 'pending' }]
+        onLog(`已选择主体视频`)
+      }
+      return
+    }
     const set = new Set(videoList.value.map(i => i.path))
     for (const p of newPaths) {
       if (!set.has(p)) {
@@ -86,7 +95,7 @@ export function useVideoImport(options = {}) {
   function registerAppDrop() {
     const handler = (e) => {
       const paths = e.detail?.paths
-      if (paths?.length) appendPaths(paths)
+      if (paths?.length) appendPaths(maxItems === 1 ? paths.slice(0, 1) : paths)
     }
     window.addEventListener('app-file-drop', handler)
     return () => window.removeEventListener('app-file-drop', handler)

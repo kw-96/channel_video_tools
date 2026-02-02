@@ -1,67 +1,32 @@
 <template>
-  <div class="panel main-layout watermark-panel">
-    <div class="main-row">
-    <aside class="pane-settings" aria-label="功能设置">
-      <section class="section-card">
-        <h3 class="section-title"><span class="icon-wrap"><Image :size="16" /></span>水印图片（支持静态/动态图）</h3>
-        <div class="btn-text-row">
-          <button type="button" class="secondary" @click="pickWatermark">选择图片</button>
-          <span class="selection-display">{{ watermarkPath ? watermarkPath.replace(/^.*[\\/]/, '') : '请选择水印图片' }}</span>
-        </div>
-        <h3 class="section-title pos-title"><span class="icon-wrap"><SlidersHorizontal :size="16" /></span>水印不透明度（默认100%）</h3>
-        <div class="opacity-row">
-          <input v-model.number="opacityPercent" type="range" min="10" max="100" class="opacity-slider" />
-          <input v-model.number="opacityPercent" type="number" min="10" max="100" class="opacity-num" />
-          <span class="opacity-unit">%</span>
-        </div>
-        <h3 class="section-title pos-title"><span class="icon-wrap"><LayoutGrid :size="16" /></span>水印位置</h3>
-        <div class="position-grid">
-          <button
-            v-for="item in positionOptions"
-            :key="item.value"
-            type="button"
-            class="position-btn"
-            :class="{ 'position-btn-active': position === item.value }"
-            @click="position = item.value"
-          >{{ item.label }}</button>
-        </div>
-        <h3 class="section-title pos-title"><span class="icon-wrap"><FolderOpen :size="16" /></span>输出目录（输出保持原命名）</h3>
-        <div class="btn-text-row">
-          <button type="button" class="secondary" @click="pickOutputDir">浏览</button>
-          <span class="selection-display">{{ outputDir || '请选择输出目录' }}</span>
-        </div>
-      </section>
-    </aside>
-    <aside class="pane-video-list" aria-label="视频列表">
-      <h2 class="pane-title"><span class="icon-wrap"><Video :size="16" /></span>视频列表</h2>
-        <div
-          class="drop-zone"
-          :class="{ 'drop-zone-active': dropActive }"
-          @dragover.prevent="dropActive = true"
-          @dragleave.prevent="dropActive = false"
-          @drop.prevent="onDrop"
-        >
-          <p class="drop-zone-text">拖拽视频文件到这里</p>
-          <button type="button" class="primary drop-zone-btn" @click="openVideoDialog">选择视频文件</button>
-        </div>
-        <div class="video-list-wrap">
-          <ul v-if="videoList.length" class="video-list" role="list">
-            <li
-              v-for="(item, i) in videoList"
-              :key="item.path + String(i)"
-              class="video-list-item"
-            >
-              <span class="video-list-filename" :title="item.path">{{ filename(item.path) }}</span>
-              <span class="video-list-status" :class="'status-' + item.status">{{ statusText(item.status) }}</span>
-            </li>
-          </ul>
-          <p v-else class="video-list-empty">暂无视频，请拖入或选择</p>
-        </div>
-    </aside>
-    </div>
-    <section class="section-card watermark-footer">
-      <div class="watermark-actions">
-        <button class="secondary" @click="reset">重置</button>
+  <div class="tab-settings">
+    <section class="section-card" aria-label="功能设置">
+      <h3 class="section-title">输出目录（输出保持原命名）</h3>
+      <div class="btn-text-row">
+        <button type="button" class="secondary" @click="pickOutputDir">浏览</button>
+        <span class="selection-display">{{ outputDir || '请选择输出目录' }}</span>
+      </div>
+      <h3 class="section-title pos-title">水印图片（支持静态/动态图）</h3>
+      <div class="btn-text-row">
+        <button type="button" class="secondary" @click="pickWatermark">选择图片</button>
+        <span class="selection-display">{{ watermarkPath ? watermarkPath.replace(/^.*[\\/]/, '') : '请选择水印图片' }}</span>
+      </div>
+      <h3 class="section-title pos-title">水印不透明度（默认100%）</h3>
+      <div class="opacity-row">
+        <input v-model.number="opacityPercent" type="range" min="10" max="100" class="opacity-slider" />
+        <input v-model.number="opacityPercent" type="number" min="10" max="100" class="opacity-num" />
+        <span class="opacity-unit">%</span>
+      </div>
+      <h3 class="section-title pos-title">水印位置</h3>
+      <div class="position-grid">
+        <button
+          v-for="item in positionOptions"
+          :key="item.value"
+          type="button"
+          class="position-btn"
+          :class="{ 'position-btn-active': position === item.value }"
+          @click="position = item.value"
+        >{{ item.label }}</button>
       </div>
     </section>
     <Teleport to="body">
@@ -73,26 +38,16 @@
         </div>
       </div>
     </Teleport>
-    <Teleport to="body">
-      <VideoImportDialog
-        :show="videoDialogOpen"
-        @close="closeVideoDialog"
-        @add-files="handleAddFiles"
-        @add-folder="handleAddFolder"
-      />
-    </Teleport>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, inject, onMounted, onUnmounted, watch } from 'vue'
-import { Video, Image, FolderOpen, SlidersHorizontal, LayoutGrid } from 'lucide-vue-next'
 import { watermarkStream } from '../api'
 import { openFile, openDir, IMAGE_FILTER } from '../dialog'
-import { useVideoImport } from '../composables/useVideoImport'
-import VideoImportDialog from '../components/VideoImportDialog.vue'
 
 const tabState = inject('tabState')
+const { videoList, inputPaths, filename, statusText, clearVideoList } = inject('videoImport')
 
 const positionOptions = [
   { label: '左上', value: 'top_left' }, { label: '上', value: 'top' }, { label: '右上', value: 'top_right' },
@@ -106,21 +61,6 @@ function log(msg) {
   logLines.value.push(`[${ts}] ${msg}`)
 }
 
-const {
-  videoList,
-  inputPaths,
-  videoDialogOpen,
-  openVideoDialog,
-  closeVideoDialog,
-  dropActive,
-  onDrop,
-  handleAddFiles,
-  handleAddFolder,
-  filename,
-  statusText,
-  registerAppDrop,
-  clearVideoList,
-} = useVideoImport({ onLog: log })
 
 const watermarkPath = ref('')
 const outputDir = ref('')
@@ -130,21 +70,18 @@ const processing = ref(false)
 const progress = ref(0)
 const doneModalOpen = ref(false)
 const doneModalMsg = ref('')
-let unlistenDrop = null
+let stopWatch = null
 
 onMounted(() => {
   tabState.start = start
-  const stopWatch = watch(() => processing.value, (v) => { tabState.processing = v }, { immediate: true })
-  const unreg = registerAppDrop()
-  unlistenDrop = () => {
-    stopWatch()
-    unreg()
-    tabState.start = null
-    tabState.processing = false
-  }
+  tabState.reset = reset
+  stopWatch = watch(() => processing.value, (v) => { tabState.processing = v }, { immediate: true })
 })
 onUnmounted(() => {
-  if (unlistenDrop) unlistenDrop()
+  if (stopWatch) stopWatch()
+  tabState.start = null
+  tabState.reset = null
+  tabState.processing = false
 })
 
 const logText = computed(() => logLines.value.join('\n') || '[暂无日志]')
@@ -231,40 +168,7 @@ function reset() {
 </script>
 
 <style scoped>
-.main-layout {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  padding: 16px;
-}
-.main-row {
-  display: flex;
-  flex-direction: row;
-  gap: 20px;
-  flex: 1;
-  min-height: 0;
-}
-.pane-settings {
-  flex: 0 0 280px;
-  min-width: 220px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-}
-.pane-video-list {
-  flex: 1;
-  min-width: 260px;
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-}
-.pane-title {
-  margin: 0 0 10px;
-  font-size: 0.9375rem;
-  font-weight: 600;
-  color: var(--fg);
-}
-.pane-settings .section-card {
+.tab-settings .section-card {
   width: 100%;
 }
 .btn-text-row {
@@ -291,13 +195,13 @@ function reset() {
   max-width: 200px;
 }
 .opacity-num {
-  width: 60px;
-  min-width: 60px;
-  padding: 6px 8px;
+  width: 56px;
+  min-width: 56px;
+  padding: 5px 6px;
   text-align: right;
 }
 .opacity-unit {
-  font-size: 14px;
+  font-size: 12px;
   color: var(--fg-muted);
 }
 .position-grid {
@@ -308,8 +212,8 @@ function reset() {
   max-width: 220px;
 }
 .position-btn {
-  padding: 8px;
-  font-size: 13px;
+  padding: 6px 12px;
+  font-size: 12px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--border);
   background: var(--bg-elevated);
@@ -325,78 +229,5 @@ function reset() {
   border-color: var(--primary);
   background: var(--primary-ghost);
   color: var(--primary);
-}
-.video-list-wrap {
-  margin-top: 10px;
-  max-height: 180px;
-  overflow: auto;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--bg-elevated);
-}
-.video-list {
-  margin: 0;
-  padding: 6px 0;
-  list-style: none;
-}
-.video-list-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 6px 10px;
-  font-size: 13px;
-  border-bottom: 1px solid var(--border);
-}
-.video-list-item:last-child {
-  border-bottom: none;
-}
-.video-list-filename {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  color: var(--fg);
-}
-.video-list-status {
-  flex-shrink: 0;
-  padding: 2px 8px;
-  border-radius: var(--radius-sm);
-  font-size: 12px;
-  font-weight: 500;
-}
-.video-list-status.status-pending {
-  background: var(--card-hover);
-  color: var(--fg-muted);
-}
-.video-list-status.status-processing {
-  background: var(--primary-ghost);
-  color: var(--primary);
-}
-.video-list-status.status-success {
-  background: rgba(34, 197, 94, 0.15);
-  color: #22c55e;
-}
-.video-list-status.status-fail {
-  background: rgba(239, 68, 68, 0.15);
-  color: #ef4444;
-}
-.video-list-empty {
-  margin: 0;
-  padding: 16px 10px;
-  font-size: 13px;
-  color: var(--fg-muted);
-  text-align: center;
-}
-.watermark-footer {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-.watermark-actions {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
 }
 </style>
